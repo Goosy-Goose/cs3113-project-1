@@ -74,8 +74,10 @@ glm::mat4 g_view_matrix,
 // const variables for movement
 constexpr float ROT_INCREMENT = 1.0f;
     // vars for cat1 move side to side
-constexpr float CAT1_MOVE_DIST = 1.0f,
-                CAT1_MOVE_SPEED = 1.0f;
+constexpr float CAT1_X_DIST = 1.0f,
+                CAT1_Y_DIST = 0.25f,
+                CAT1_MOVE_X_SPEED = 1.0f,
+                CAT1_MOVE_Y_SPEED = CAT1_MOVE_X_SPEED * 2;
     // vars for cat2's circle
 constexpr float CAT2_RADIUS_X = 2.2f,
                 CAT2_RADIUS_Y = 3.3f;
@@ -91,7 +93,8 @@ constexpr float CAT2_BASE_AMP = 1.1f,
 glm::vec3 g_rotation_cat1 = glm::vec3(0.0f, 0.0f, 0.0f),
           g_rotation_cat2 = glm::vec3(0.0f, 0.0f, 0.0f);
     // accumulator angle for moving side-to-side
-float g_cat1_mvmt_theta = 0.0f;
+float g_cat1_move_x_theta = 0.0f;
+float g_cat1_move_y_theta = 0.0f;
     // accumulator offsets for actual x and y of side-to-side
 float g_cat1_x_offset = 0.0f,
       g_cat1_y_offset = 0.0f;
@@ -207,8 +210,10 @@ static void update() {
 
     /* Game logic */
         // move cat 1 side to side
-    g_cat1_mvmt_theta += CAT1_MOVE_SPEED * delta_time;
-    g_cat1_x_offset = CAT1_MOVE_DIST * glm::cos(g_cat1_mvmt_theta);
+    g_cat1_move_x_theta += CAT1_MOVE_X_SPEED * delta_time;
+    g_cat1_move_y_theta += CAT1_MOVE_Y_SPEED * delta_time;
+    g_cat1_x_offset = CAT1_X_DIST * glm::cos(g_cat1_move_x_theta);
+    g_cat1_y_offset = CAT1_Y_DIST * glm::sin(g_cat1_move_y_theta);
         // rotate cat 1 (flip)
     g_rotation_cat1.y += -1 * ROT_INCREMENT * delta_time;
         // move cat 2 in circle (ellipse)
@@ -228,7 +233,7 @@ static void update() {
 
     /* Transformations */
         // cat 1 (crying cat)
-    g_cat1_model_matrix = glm::translate(g_cat1_model_matrix, glm::vec3(g_cat1_x_offset, 0.0f, 0.0f));
+    g_cat1_model_matrix = glm::translate(g_cat1_model_matrix, glm::vec3(g_cat1_x_offset, g_cat1_y_offset, 0.0f));
     g_cat1_model_matrix = glm::rotate(g_cat1_model_matrix, g_rotation_cat1.y, glm::vec3(0.0f, 1.0f, 0.0f));
     g_cat1_model_matrix = glm::scale(g_cat1_model_matrix, INIT_SCALE_CAT1);
 
@@ -286,12 +291,12 @@ static void shutdown() { SDL_Quit(); }
 
 int main(int argc, char* argv[])
 {
-    // Initialise our program—whatever that means
+    // Initialise our programâ€”whatever that means
     initialise();
 
     while (g_app_status == RUNNING)
     {
-        process_input();  // If the player did anything—press a button, move the joystick—process it
+        process_input();  // If the player did anythingâ€”press a button, move the joystickâ€”process it
         update();         // Using the game's previous state, and whatever new input we have, update the game's state
         render();         // Once updated, render those changes onto the screen
     }
